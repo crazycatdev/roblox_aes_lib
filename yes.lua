@@ -1191,8 +1191,13 @@ end
 function AESWritefile(Filename, Data, Key)
     return pcall(writefile, Filename, encrypt(Key, Data, 32, nil, nil, nil))
 end
-function AESReadfile(Filename, Key)
+function AESReadfile(Filename, Key, readfile)
+    --Modded by crazy_cat to support strings
+    if readfile == true then
     return decrypt(Key, readfile(Filename), 32, nil, nil, nil)
+    else
+    return decrypt(Key, Filename, 32, nil, nil, nil)
+    end
 end
 
 return {
