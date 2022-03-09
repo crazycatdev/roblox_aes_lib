@@ -1202,5 +1202,7 @@ end
 
 return {
     Writefile = AESWritefile,
-    Readfile = AESReadfile
+    Readfile = AESReadfile,
+    decrypt = decrypt,
+    encrypt = encrypt
 }
