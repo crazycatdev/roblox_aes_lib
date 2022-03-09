@@ -24,14 +24,14 @@ return {
 	bnot = bit.bnot,
 	band = bit.band,
 	bor  = bit.bor,
-	bxor = bit.bxor,
+	bxor = bXOR,
 	rshift = rshift,
 	lshift = lshift,
 }
 end)
 local gf=_W(function(_ENV, ...)
 -- finite field with base 2 and modulo irreducible polynom x^8+x^4+x^3+x+1 = 0x11d
-local bxor = bit.bxor
+local bxor = bXOR
 local lshift = bit.lshift
 
 -- private data of gf
@@ -153,7 +153,7 @@ return {
 end)
 util=_W(function(_ENV, ...)
 -- Cache some bit operators
-local bxor = bit.bxor
+local bxor = bXOR
 local rshift = bit.rshift
 local band = bit.band
 local lshift = bit.lshift
@@ -461,7 +461,7 @@ local function affinMap(byte)
 		end
 	end
 
-	return bit.bxor(result, 0x63)
+	return bXOR(result, 0x63)
 end
 
 --
@@ -590,12 +590,12 @@ local function expandEncryptionKey(key)
 			tmp = subWord(tmp)
 
 			local index = math.floor(i/keyWords)
-			tmp = bit.bxor(tmp,rCon[index])
+			tmp = bXOR(tmp,rCon[index])
 		elseif (keyWords > 6 and i % keyWords == 4) then
 			tmp = subWord(tmp)
 		end
 
-		keySchedule[i] = bit.bxor(keySchedule[(i-keyWords)],tmp)
+		keySchedule[i] = bXOR(keySchedule[(i-keyWords)],tmp)
 	end
 
 	return keySchedule
@@ -640,17 +640,17 @@ local function invMixColumn(word)
 	local b2 = getByte(word,1)
 	local b3 = getByte(word,0)
 
-	local t = bit.bxor(b3,b2)
-	local u = bit.bxor(b1,b0)
-	local v = bit.bxor(t,u)
-	v = bit.bxor(v,gf.mul(0x08,v))
-	w = bit.bxor(v,gf.mul(0x04, bit.bxor(b2,b0)))
-	v = bit.bxor(v,gf.mul(0x04, bit.bxor(b3,b1)))
+	local t = bXOR(b3,b2)
+	local u = bXOR(b1,b0)
+	local v = bXOR(t,u)
+	v = bXOR(v,gf.mul(0x08,v))
+	w = bXOR(v,gf.mul(0x04, bXOR(b2,b0)))
+	v = bXOR(v,gf.mul(0x04, bXOR(b3,b1)))
 
-	return putByte( bit.bxor(bit.bxor(b3,v), gf.mul(0x02, bit.bxor(b0,b3))), 0)
-		 + putByte( bit.bxor(bit.bxor(b2,w), gf.mul(0x02, t              )), 1)
-		 + putByte( bit.bxor(bit.bxor(b1,v), gf.mul(0x02, bit.bxor(b0,b3))), 2)
-		 + putByte( bit.bxor(bit.bxor(b0,w), gf.mul(0x02, u              )), 3)
+	return putByte( bXOR(bXOR(b3,v), gf.mul(0x02, bXOR(b0,b3))), 0)
+		 + putByte( bXOR(bXOR(b2,w), gf.mul(0x02, t              )), 1)
+		 + putByte( bXOR(bXOR(b1,v), gf.mul(0x02, bXOR(b0,b3))), 2)
+		 + putByte( bXOR(bXOR(b0,w), gf.mul(0x02, u              )), 3)
 end
 
 --
@@ -679,7 +679,7 @@ end
 --
 local function addRoundKey(state, key, round)
 	for i = 0, 3 do
-		state[i + 1] = bit.bxor(state[i + 1], key[round*4+i])
+		state[i + 1] = bXOR(state[i + 1], key[round*4+i])
 	end
 end
 
@@ -687,25 +687,25 @@ end
 -- do encryption round (ShiftRow, SubBytes, MixColumn together)
 --
 local function doRound(origState, dstState)
-	dstState[1] =  bit.bxor(bit.bxor(bit.bxor(
+	dstState[1] =  bXOR(bXOR(bXOR(
 				table0[getByte(origState[1],3)],
 				table1[getByte(origState[2],2)]),
 				table2[getByte(origState[3],1)]),
 				table3[getByte(origState[4],0)])
 
-	dstState[2] =  bit.bxor(bit.bxor(bit.bxor(
+	dstState[2] =  bXOR(bXOR(bXOR(
 				table0[getByte(origState[2],3)],
 				table1[getByte(origState[3],2)]),
 				table2[getByte(origState[4],1)]),
 				table3[getByte(origState[1],0)])
 
-	dstState[3] =  bit.bxor(bit.bxor(bit.bxor(
+	dstState[3] =  bXOR(bXOR(bXOR(
 				table0[getByte(origState[3],3)],
 				table1[getByte(origState[4],2)]),
 				table2[getByte(origState[1],1)]),
 				table3[getByte(origState[2],0)])
 
-	dstState[4] =  bit.bxor(bit.bxor(bit.bxor(
+	dstState[4] =  bXOR(bXOR(bXOR(
 				table0[getByte(origState[4],3)],
 				table1[getByte(origState[1],2)]),
 				table2[getByte(origState[2],1)]),
@@ -741,25 +741,25 @@ end
 -- do decryption round
 --
 local function doInvRound(origState, dstState)
-	dstState[1] =  bit.bxor(bit.bxor(bit.bxor(
+	dstState[1] =  bXOR(bXOR(bXOR(
 				tableInv0[getByte(origState[1],3)],
 				tableInv1[getByte(origState[4],2)]),
 				tableInv2[getByte(origState[3],1)]),
 				tableInv3[getByte(origState[2],0)])
 
-	dstState[2] =  bit.bxor(bit.bxor(bit.bxor(
+	dstState[2] =  bXOR(bXOR(bXOR(
 				tableInv0[getByte(origState[2],3)],
 				tableInv1[getByte(origState[1],2)]),
 				tableInv2[getByte(origState[4],1)]),
 				tableInv3[getByte(origState[3],0)])
 
-	dstState[3] =  bit.bxor(bit.bxor(bit.bxor(
+	dstState[3] =  bXOR(bXOR(bXOR(
 				tableInv0[getByte(origState[3],3)],
 				tableInv1[getByte(origState[2],2)]),
 				tableInv2[getByte(origState[1],1)]),
 				tableInv3[getByte(origState[4],0)])
 
-	dstState[4] =  bit.bxor(bit.bxor(bit.bxor(
+	dstState[4] =  bXOR(bXOR(bXOR(
 				tableInv0[getByte(origState[4],3)],
 				tableInv1[getByte(origState[3],2)]),
 				tableInv2[getByte(origState[2],1)]),
